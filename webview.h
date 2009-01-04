@@ -33,6 +33,10 @@ public:
 private:
     bool m_advancedSelection;
     SelectionWidget *m_selectionWidget;
+    QPoint startPos;
+
+signals:
+    void previewReady(const QPixmap &, const QString &);
 
 protected:
     void mousePressEvent(QMouseEvent *event);

@@ -21,17 +21,46 @@
 
 #include <QLineEdit>
 #include <QIcon>
+#include <QProgressBar>
+#include <QDockWidget>
+#include <QLabel>
 
 #include <QDebug>
 
 MWindow::MWindow(QWidget *parent) : QMainWindow(parent)
 {
+    ////// The MainWindow //////
     ui.setupUi(this);
-    statusBar()->addPermanentWidget(ui.progressBar);
-    connect (ui.webView, SIGNAL(loadProgress(int)), ui.progressBar, SLOT(setValue(int)));
+    progressBar = new QProgressBar(this);
+    progressBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+    statusBar()->addPermanentWidget(progressBar);
+
+    connect (ui.webView, SIGNAL(loadProgress(int)), progressBar, SLOT(setValue(int)));
     connect (ui.webView, SIGNAL(loadFinished(bool)), this, SLOT(completeOperations(bool)));
+    connect (ui.webView, SIGNAL(previewReady(const QPixmap &, const QString &)), 
+             this, SLOT(showPreview(const QPixmap &, const QString &)));
+
     connect (ui.urlBox->lineEdit(), SIGNAL(returnPressed()), this, SLOT(goToUrl()));
     connect (ui.goButton, SIGNAL(clicked()), this, SLOT(goToUrl()));
+
+    ////// The PreviewWidget //////
+    QDockWidget *dockWidget = new QDockWidget(tr("Page Preview"), this);
+    dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockWidget->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    QWidget *widget = new QWidget(this);
+    pwidget.setupUi(widget);
+    dockWidget->setWidget(widget);
+
+    QPalette p = pwidget.scrollArea->palette();
+    p.setColor(QPalette::Window, p.color(QPalette::Dark));
+    pwidget.scrollArea->setPalette(p);
+
+    QLabel *previewLabel = new QLabel(this);
+    previewLabel->setAlignment(Qt::AlignCenter);
+    pwidget.scrollArea->setWidget(previewLabel);
+    pwidget.scrollArea->setAlignment(Qt::AlignCenter);
+
+    addDockWidget(Qt::RightDockWidgetArea, dockWidget);
 }
 
 MWindow::~MWindow()
@@ -64,5 +93,12 @@ void MWindow::completeOperations(bool ok)
     ui.urlBox->setEditText(ui.webView->url().toString());
     ui.urlBox->setItemIcon(ui.urlBox->currentIndex(), ui.webView->icon());
 }
+
+void MWindow::showPreview(const QPixmap &preview, const QString &html)
+{
+    static_cast<QLabel*>(pwidget.scrollArea->widget())->setPixmap(preview);
+    pwidget.textBrowser->setText(html);
+}
+
 
 #include "mwindow.moc"

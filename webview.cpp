@@ -40,6 +40,7 @@ void WebView::mousePressEvent(QMouseEvent *event)
         delete m_selectionWidget;
         m_selectionWidget = new SelectionWidget(this);
         m_selectionWidget->move(event->pos());
+        startPos = m_selectionWidget->pos();
         m_selectionWidget->resize(0, 0);
         m_selectionWidget->show();
     } else {
@@ -53,10 +54,7 @@ void WebView::mouseReleaseEvent(QMouseEvent *event)
         delete m_selectionWidget;
         m_selectionWidget = 0;
     } else {
-        QLabel *label = new QLabel();
-        label->setAttribute(Qt::WA_DeleteOnClose);
-        label->setPixmap(m_selectionWidget->getSelection());
-        label->show();
+        emit previewReady(m_selectionWidget->getSelection(), QString());
     }
 
     m_advancedSelection = false;
@@ -69,9 +67,16 @@ void WebView::mouseMoveEvent(QMouseEvent *event)
         QWebView::mouseMoveEvent(event);
     } else {
         QPoint delta = event->pos();
-        delta -= m_selectionWidget->pos();
-        // TODO: handle negative deltas
-        m_selectionWidget->resize(delta.x(), delta.y());
+        delta -= startPos;
+        // TODO: better handle negative deltas
+        if (delta.x() > 0 || delta.y() > 0) {
+            m_selectionWidget->resize(delta.x(), delta.y());
+        } else {
+            QPoint source(startPos);
+            m_selectionWidget->move(event->pos());
+            source -= event->pos();
+            m_selectionWidget->resize(source.x(), source.y());
+        }
     }
 }
 

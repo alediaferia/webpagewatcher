@@ -43,6 +43,7 @@ void SelectionWidget::paintEvent(QPaintEvent *event)
     fillRect.setWidth(fillRect.width() - 1);
     fillRect.setHeight(fillRect.height() - 1);
     painter.drawRect(fillRect);
+
     painter.end();
 }
 

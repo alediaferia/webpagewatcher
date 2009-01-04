@@ -21,8 +21,11 @@
 #define MWINDOW_H
 
 #include "ui_mwindowui.h"
+#include "ui_previewwidget.h"
 
 #include <QMainWindow>
+
+class QProgressBar;
 
 class MWindow : public QMainWindow
 {
@@ -38,9 +41,12 @@ protected slots:
     void loadUrl(const QUrl &);
     void goToUrl();
     void completeOperations(bool);
+    void showPreview(const QPixmap &, const QString &);
 
 private:
     Ui::MainWindow ui;
+    Ui::PreviewWidget pwidget;
+    QProgressBar *progressBar;
 };
 
 #endif

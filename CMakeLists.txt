@@ -23,6 +23,7 @@ selectionwidget.cpp
 
 set (wpuis_UIS
     mwindowui.ui
+    previewwidget.ui
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}
